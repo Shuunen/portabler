@@ -21,6 +21,8 @@ Create portable apps in 1 click !
 1. Go to an application folder to create your portable app
 2. Right click on the main executable file and choose PortableR
 
+![Usage video](https://github.com/Shuunen/portabler/blob/master/Usage.gif)
+
 ## Thanks
 - ResourceHacker : the best resource editing tool (http://angusj.com/resourcehacker/)
 - Elevate : a handy tool to start app with higher privileges (www.winability.com/elevate/)
