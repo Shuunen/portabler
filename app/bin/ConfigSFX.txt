@@ -1,0 +1,5 @@
+TempMode
+Silent=2
+Overwrite=2
+Title=Portable App by PortableR
+Setup=IObitUninstaler.exe

@@ -1,0 +1,1 @@
+start app/bin/third-party/Elevate.exe app\bin\PortableR.exe install
