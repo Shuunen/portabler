@@ -17,7 +17,7 @@ namespace PortableR
 
             // create log file
             StreamWriter log = new StreamWriter(portablerFolder + "debug.log");
-            log.WriteLine("   ___           _        _     _        __  ");
+            log.WriteLine("\n   ___           _        _     _        __  ");
             log.WriteLine("  / _ \\___  _ __| |_ __ _| |__ | | ___  /__\\ ");
             log.WriteLine(" / /_)/ _ \\| '__| __/ _` | '_ \\| |/ _ \\/ \\// ");
             log.WriteLine("/ ___/ (_) | |  | || (_| | |_) | |  __/ _  \\ ");
@@ -25,6 +25,7 @@ namespace PortableR
 
             // log parameters
             log.WriteLine("\n\n=== Variables ===");
+            log.WriteLine("arguments       : " + String.Join(", ", arguments));
             log.WriteLine("portablerExe    : " + portablerExe);
             log.WriteLine("portablerFolder : " + portablerFolder);
 
@@ -93,15 +94,14 @@ namespace PortableR
 
                 string cmd, parameters;
 
-                // create sfx
+                // create sfx               
                 try
                 {
                     cmd = portablerFolder + "third-party\\" + "rar.exe";
                     parameters = " " + "a -ep -ep1 -r -sfx\"" + portablerFolder + "Default.sfx\" -z\"" + portablerFolder + "ConfigSFX.txt\" \"" + appDir + portableAppTemp + "\" \"" + appDir + "*\"";
                     log.WriteLine("\n=== SFX Creation ===");
                     log.WriteLine("starting cmd    : " + cmd);
-                    log.WriteLine("with params     : " + parameters);
-                    log.Flush();
+                    log.WriteLine("with params     :" + parameters);
                     Process sfxProcess = Process.Start(cmd, parameters);
                     sfxProcess.WaitForExit();
                 }
@@ -109,17 +109,20 @@ namespace PortableR
                 {
                     log.WriteLine("error while producing sfx : " + ex.Message);
                 }
+                finally
+                {
+                    log.Flush();
+                }
 
 
-                // inject icon
+                // extract icon                
                 try
                 {
                     cmd = portablerFolder + "third-party\\" + "ResourceHacker.exe";
                     parameters = " " + "-extract" + " " + "\"" + appExe + "\"" + ", MyProgIcons.rc, icongroup,,";
                     log.WriteLine("\n=== Icon Extract ===");
                     log.WriteLine("starting cmd    : " + cmd);
-                    log.WriteLine("with params     : " + parameters);
-                    log.Flush();
+                    log.WriteLine("with params     :" + parameters);
                     Process extractProcess = Process.Start(cmd, parameters);
                     extractProcess.WaitForExit();
 
@@ -128,36 +131,60 @@ namespace PortableR
                 {
                     log.WriteLine("error while extracting icon : " + ex.Message);
                 }
+                finally
+                {
+                    log.Flush();
+                }
 
+                // inject icon
                 try
                 {
-                    cmd = portablerFolder + "third-party\\" + "ResourceHacker.exe";
-                    parameters = " " + "-addoverwrite" + " " + "\"" + appDir + portableAppTemp + "\"" + "," + portableAppName + ",Icon_1.ico,ICONGROUP,MAINICON,0";
                     log.WriteLine("\n=== Icon Injection ===");
-                    log.WriteLine("starting cmd    : " + cmd);
-                    log.WriteLine("with params     : " + parameters);
-                    log.Flush();
-                    Process injectProcess = Process.Start(cmd, parameters);
-                    injectProcess.WaitForExit();
+                    long iconFileSize = new FileInfo(appDir + "Icon_1.ico").Length;
+                    log.WriteLine("icon file size  : " + iconFileSize);
+                    if (iconFileSize > 1)
+                    {
+                        cmd = portablerFolder + "third-party\\" + "ResourceHacker.exe";
+                        parameters = " " + "-addoverwrite" + " " + "\"" + appDir + portableAppTemp + "\"" + "," + portableAppName + ",Icon_1.ico,ICONGROUP,MAINICON,0";
+                        log.WriteLine("starting cmd    : " + cmd);
+                        log.WriteLine("with params     :" + parameters);
+                        Process injectProcess = Process.Start(cmd, parameters);
+                        injectProcess.WaitForExit();
+                    }
+                    else
+                    {
+                        log.WriteLine("no icon inject  : icon file size around zero bytes");
+                        File.Move(appDir + portableAppTemp, appDir + portableAppName);
+                    }
                 }
                 catch (Exception ex)
                 {
                     log.WriteLine("error while injecting icon : " + ex.Message);
                 }
+                finally
+                {
+                    log.Flush();
+                }
 
+                // temporary file cleaning
                 try
                 {
+                    log.WriteLine("\n=== Temp File Cleaning ===");
+                    log.WriteLine("deleting file   : " + portableAppTemp);
                     File.Delete(appDir + portableAppTemp);
+                    log.WriteLine("deleting file   : " + "MyProgIcons.rc");
                     File.Delete(appDir + "MyProgIcons.rc");
                     string[] icons = Directory.GetFiles(appDir, "*.ico");
                     foreach (string icon in icons)
                     {
+                        log.WriteLine("deleting file   : " + icon);
                         File.Delete(icon);
                     }
+
                 }
                 catch (Exception ex)
                 {
-                    log.WriteLine("error while deleting temp files : " + ex.Message);
+                    log.WriteLine("error while cleaning temp files : " + ex.Message);
                 }
 
             }
