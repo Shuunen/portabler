@@ -7,34 +7,38 @@ namespace PortableR
 {
     class Program
     {
+        static string logFile = "debug.log";
+        static StreamWriter logInstance;
+        static bool hadError = false;
+
         static void Main(string[] args)
         {
-            // init vars
+            // init
             string[] arguments = Environment.GetCommandLineArgs();
             string portablerExe = arguments[0]; // C:\Projects\portabler\app\bin\PortableR.exe
             string portablerFolder = Path.GetDirectoryName(portablerExe) + "\\"; // C:\Projects\portabler\app\bin\
             string action = arguments.Length > 1 ? arguments[1] : "";
+            logInstance = new StreamWriter(portablerFolder + logFile);
+            logInstance.AutoFlush = true;
 
-            // create log file
-            StreamWriter log = new StreamWriter(portablerFolder + "debug.log");
-            log.WriteLine("\n   ___           _        _     _        __  ");
-            log.WriteLine("  / _ \\___  _ __| |_ __ _| |__ | | ___  /__\\ ");
-            log.WriteLine(" / /_)/ _ \\| '__| __/ _` | '_ \\| |/ _ \\/ \\// ");
-            log.WriteLine("/ ___/ (_) | |  | || (_| | |_) | |  __/ _  \\ ");
-            log.WriteLine("\\/    \\___/|_|   \\__\\__,_|_.__/|_|\\___\\/ \\_/ ");
+            // splash
+            Log("\n", "draw");
+            Log("   ___           _        _     _        __  ", "draw");
+            Log("  / _ \\___  _ __| |_ __ _| |__ | | ___  /__\\ ", "draw");
+            Log(" / /_)/ _ \\| '__| __/ _` | '_ \\| |/ _ \\/ \\// ", "draw");
+            Log("/ ___/ (_) | |  | || (_| | |_) | |  __/ _  \\ ", "draw");
+            Log("\\/    \\___/|_|   \\__\\__,_|_.__/|_|\\___\\/ \\_/ ", "draw");
 
             // log parameters
-            log.WriteLine("\n\n=== Variables ===");
-            log.WriteLine("arguments       : " + String.Join(", ", arguments));
-            log.WriteLine("portablerExe    : " + portablerExe);
-            log.WriteLine("portablerFolder : " + portablerFolder);
+            Log("Variables", "title");
+            Log("arguments : " + String.Join(", ", arguments));
+            Log("portablerExe : " + portablerExe);
+            Log("portablerFolder : " + portablerFolder);
 
             if (action.Length > 0)
             {
-                log.WriteLine("action          : " + action);
+                Log("action : " + action);
             }
-
-            log.Flush();
 
             if (action == "install")
             {
@@ -47,7 +51,7 @@ namespace PortableR
                 }
                 catch (Exception ex)
                 {
-                    log.WriteLine("error during wrinting to reg : " + ex);
+                    Log("error during wrinting to reg : " + ex, "error");
                 }
                 finally
                 {
@@ -59,10 +63,10 @@ namespace PortableR
                 string appExe = arguments[2]; // "C:\\My Apps\\Text Reader\\tr2.exe";            
                 string appName = Path.GetFileName(appExe); // "tr2.exe"               
                 string appDir = Path.GetDirectoryName(appExe); // "C:\\My Apps\\Text Reader"      
-                log.WriteLine("appExe          : " + appExe);
-                log.WriteLine("appName         : " + appName);
-                log.WriteLine("appDir          : " + appDir);
-                log.Flush();
+                Log("appExe : " + appExe);
+                Log("appName : " + appName);
+                Log("appDir : " + appDir);
+
 
                 // set portable app temp & final name
                 string portableAppTemp = "portableApp.exe";
@@ -75,12 +79,12 @@ namespace PortableR
                 string finalVersion = (int.Parse(version) > int.Parse(fileVersion)) ? version : fileVersion;
                 portableAppName += ("_" + (finalVersion + "000").Substring(0, 3) + ".exe");  // "Text.Reader_200.exe"
                 appDir += "\\";
-                log.WriteLine("version         : " + version);
-                log.WriteLine("fileVersion     : " + fileVersion);
-                log.WriteLine("finalVersion    : " + finalVersion);
-                log.WriteLine("portableAppTemp : " + portableAppTemp);
-                log.WriteLine("portableAppName : " + portableAppName);
-                log.Flush();
+                Log("version : " + version);
+                Log("fileVersion : " + fileVersion);
+                Log("finalVersion : " + finalVersion);
+                Log("portableAppTemp : " + portableAppTemp);
+                Log("portableAppName : " + portableAppName);
+
 
                 // create sfx config
                 StreamWriter configSFX = new StreamWriter(portablerFolder + "ConfigSFX.txt");
@@ -98,108 +102,162 @@ namespace PortableR
                 try
                 {
                     cmd = portablerFolder + "third-party\\" + "rar.exe";
-                    parameters = " " + "a -ep -ep1 -r -sfx\"" + portablerFolder + "Default.sfx\" -z\"" + portablerFolder + "ConfigSFX.txt\" \"" + appDir + portableAppTemp + "\" \"" + appDir + "*\"";
-                    log.WriteLine("\n=== SFX Creation ===");
-                    log.WriteLine("starting cmd    : " + cmd);
-                    log.WriteLine("with params     :" + parameters);
+                    parameters = "a -ep -ep1 -r -sfx\"" + portablerFolder + "Default.sfx\" -z\"" + portablerFolder + "ConfigSFX.txt\" \"" + appDir + portableAppTemp + "\" \"" + appDir + "*\"";
+
+                    Log("SFX Creation", "title");
+                    Log("starting cmd : " + cmd);
+                    Log("with params : " + parameters);
+
                     Process sfxProcess = Process.Start(cmd, parameters);
                     sfxProcess.WaitForExit();
                 }
                 catch (Exception ex)
                 {
-                    log.WriteLine("error while producing sfx : " + ex.Message);
+                    Log("error while producing sfx : " + ex.Message, "error");
                 }
-                finally
-                {
-                    log.Flush();
-                }
-
 
                 // extract icon                
                 try
                 {
                     cmd = portablerFolder + "third-party\\" + "ResourceHacker.exe";
-                    parameters = " " + "-extract" + " " + "\"" + appExe + "\"" + ", MyProgIcons.rc, icongroup,,";
-                    log.WriteLine("\n=== Icon Extract ===");
-                    log.WriteLine("starting cmd    : " + cmd);
-                    log.WriteLine("with params     :" + parameters);
+                    parameters = "-extract" + " " + "\"" + appExe + "\"" + ", MyProgIcons.rc, icongroup,,";
+
+                    Log("Icon Extract", "title");
+                    Log("starting cmd : " + cmd);
+                    Log("with params : " + parameters);
+
                     Process extractProcess = Process.Start(cmd, parameters);
                     extractProcess.WaitForExit();
 
                 }
                 catch (Exception ex)
                 {
-                    log.WriteLine("error while extracting icon : " + ex.Message);
-                }
-                finally
-                {
-                    log.Flush();
+                    Log("error while extracting icon : " + ex.Message, "error");
                 }
 
                 // inject icon
                 try
                 {
-                    log.WriteLine("\n=== Icon Injection ===");
-                    long iconFileSize = new FileInfo(appDir + "Icon_1.ico").Length;
-                    log.WriteLine("icon file size  : " + iconFileSize);
+                    Log("Icon Injection", "title");
+                    FileInfo iconFile = new FileInfo(appDir + "Icon_1.ico");
+                    long iconFileSize = 0;
+                    if (iconFile.Exists)
+                    {
+                        iconFileSize = new FileInfo(appDir + "Icon_1.ico").Length;
+                        Log("icon file size  : " + iconFileSize);
+                    }
+
                     if (iconFileSize > 1)
                     {
                         cmd = portablerFolder + "third-party\\" + "ResourceHacker.exe";
-                        parameters = " " + "-addoverwrite" + " " + "\"" + appDir + portableAppTemp + "\"" + "," + portableAppName + ",Icon_1.ico,ICONGROUP,MAINICON,0";
-                        log.WriteLine("starting cmd    : " + cmd);
-                        log.WriteLine("with params     :" + parameters);
+                        parameters = "-addoverwrite" + " " + "\"" + appDir + portableAppTemp + "\"" + "," + portableAppName + ",Icon_1.ico,ICONGROUP,MAINICON,0";
+                        Log("starting cmd : " + cmd);
+                        Log("with params : " + parameters);
                         Process injectProcess = Process.Start(cmd, parameters);
                         injectProcess.WaitForExit();
                     }
                     else
                     {
-                        log.WriteLine("no icon inject  : icon file size around zero bytes");
+                        Log("no icon injection : icon file not extracted", "error");
+                        File.Delete(appDir + portableAppName);
                         File.Move(appDir + portableAppTemp, appDir + portableAppName);
                     }
                 }
                 catch (Exception ex)
                 {
-                    log.WriteLine("error while injecting icon : " + ex.Message);
-                }
-                finally
-                {
-                    log.Flush();
+                    Log("error while injecting icon : " + ex.Message, "error");
                 }
 
                 // temporary file cleaning
                 try
                 {
-                    log.WriteLine("\n=== Temp File Cleaning ===");
-                    log.WriteLine("deleting file   : " + portableAppTemp);
+                    Log("Temp File Cleaning", "title");
+                    Log("deleting file : " + portableAppTemp);
                     File.Delete(appDir + portableAppTemp);
-                    log.WriteLine("deleting file   : " + "MyProgIcons.rc");
+                    Log("deleting file : " + "MyProgIcons.rc");
                     File.Delete(appDir + "MyProgIcons.rc");
                     string[] icons = Directory.GetFiles(appDir, "*.ico");
                     foreach (string icon in icons)
                     {
-                        log.WriteLine("deleting file   : " + icon);
+                        Log("deleting file : " + icon);
                         File.Delete(icon);
                     }
 
                 }
                 catch (Exception ex)
                 {
-                    log.WriteLine("error while cleaning temp files : " + ex.Message);
+                    Log("error while cleaning temp files : " + ex.Message, "error");
                 }
 
             }
             else if (action == "")
             {
-                log.WriteLine("no action given");
+                Log("no action given");
             }
             else
             {
-                log.WriteLine("non handled action");
+                Log("non handled action");
             }
 
-            // flush and close log
-            log.Flush();
-            log.Close();
+            // close log
+            Log("PortableR end", "end");
+
+            if (hadError)
+            {
+                System.Windows.Forms.MessageBox.Show("Some error(s) happended, look at " + portablerFolder + logFile);
+            }
         }
+
+        static string logPrefix, logSuffix, logSpaces;
+        static int logMargin = 18;
+
+        static void Log(string str, string type = "debug")
+        {
+
+            logPrefix = "";
+            logSuffix = "";
+
+            if (type == "error")
+            {
+                hadError = true;
+                logPrefix = "[ ERROR ] ";
+            }
+            else if (type == "debug")
+            {
+                logPrefix = "[ debug ] ";
+            }
+            else if (type == "title")
+            {
+                logPrefix = "\n\n- ";
+                logSuffix = "\n------------------------------";
+            }
+            else if (type == "end")
+            {
+                logPrefix = "\n\n=============================\n= ";
+                logSuffix = "\n=============================";
+            }
+            else if (type == "draw")
+            {
+                logPrefix = " ";
+            }
+
+            int index = str.IndexOf(":");
+            if (index > 0)
+            {
+                logSpaces = new string(' ', logMargin - index);
+                str = str.Substring(0, index) + logSpaces + " : " + str.Substring(index + 1);
+            }
+
+            logInstance.WriteLine(logPrefix + str + logSuffix);
+
+            logInstance.Flush();
+
+            if (type == "end")
+            {
+                logInstance.Close();
+            }
+        }
+
     }
+
 }
