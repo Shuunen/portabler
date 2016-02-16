@@ -1,0 +1,77 @@
+ 
+
+    ___           _        _     _        __  
+   / _ \___  _ __| |_ __ _| |__ | | ___  /__\ 
+  / /_)/ _ \| '__| __/ _` | '_ \| |/ _ \/ \// 
+ / ___/ (_) | |  | || (_| | |_) | |  __/ _  \ 
+ \/    \___/|_|   \__\__,_|_.__/|_|\___\/ \_/ 
+
+
+- Variables aa
+------------------------------
+[ debug ] arguments          :  C:\Users\romain\ownCloud\Projects\portabler\app\bin\PortableR.exe, create, C:\Users\romain\Apps\Audacity\audacity.exe
+[ debug ] portablerExe       :  C:\Users\romain\ownCloud\Projects\portabler\app\bin\PortableR.exe
+[ debug ] portablerFolder    :  C:\Users\romain\ownCloud\Projects\portabler\app\bin\
+[ debug ] portableAppTemp    :  portableApp.exe
+[ debug ] iconsFolder        :  C:\Users\romain\ownCloud\Projects\portabler\icons\
+[ debug ] sfxFolder          :  C:\Users\romain\ownCloud\Projects\portabler\sfx\
+[ debug ] thirdPartyFolder   :  C:\Users\romain\ownCloud\Projects\portabler\third-party\
+[ debug ] extractFolder      :  C:\Users\romain\Apps\
+[ debug ] appExe             :  C:\Users\romain\Apps\Audacity\audacity.exe
+[ debug ] appName            :  audacity.exe
+[ debug ] appDir             :  C:\Users\romain\Apps\Audacity\
+[ debug ] action             :  create
+
+
+- create
+------------------------------
+[ debug ] dir                :  C:\Users\romain\Apps\Audacity
+[ debug ] portableAppName    :  Audacity
+[ debug ] version            :  2100
+[ debug ] fileVersion        :  2100
+[ debug ] finalVersion       :  210
+
+
+- SFX Creation
+------------------------------
+[ debug ] starting cmd       :  C:\Users\romain\ownCloud\Projects\portabler\third-party\rar.exe
+[ debug ] with params        :  a -ep -ep1 -r -sfx"C:\Users\romain\ownCloud\Projects\portabler\sfx\base.sfx" -z"C:\Users\romain\ownCloud\Projects\portabler\sfx\conf.txt" "C:\Users\romain\Apps\Audacity\portableApp.exe" "C:\Users\romain\Apps\Audacity\*"
+
+
+- Icon Extract
+------------------------------
+[ debug ] icon file path     :  C:\Users\romain\Apps\Audacity\icon.ico
+[ debug ] icon file path     :  C:\Users\romain\Apps\Audacity\Icon_1.ico
+[ debug ] starting cmd       :  C:\Users\romain\ownCloud\Projects\portabler\third-party\ResourceHacker.exe
+[ debug ] with params        :  -extract "C:\Users\romain\Apps\Audacity\audacity.exe", MyProgIcons.rc, icongroup,,
+
+
+- Icon Injection
+------------------------------
+[ debug ] icon file path     :  C:\Users\romain\Apps\Audacity\Icon_1.ico
+[ debug ] icon file exists   :  True
+[ debug ] icon file size     :  291712
+[ debug ] icon file selected
+[ debug ] starting cmd       :  C:\Users\romain\ownCloud\Projects\portabler\third-party\ResourceHacker.exe
+[ debug ] with params        :  -addoverwrite "C:\Users\romain\Apps\Audacity\portableApp.exe",Audacity_210.exe,"C:\Users\romain\Apps\Audacity\Icon_1.ico",ICONGROUP,MAINICON,0
+
+
+- Temp File Cleaning
+------------------------------
+[ debug ] deleting file      :  portableApp.exe
+[ debug ] deleting file      :  MyProgIcons.rc
+[ debug ] deleting file      :  C:\Users\romain\Apps\Audacity\Icon_1.ico
+[ debug ] deleting file      :  C:\Users\romain\Apps\Audacity\Icon_10.ico
+[ debug ] deleting file      :  C:\Users\romain\Apps\Audacity\Icon_2.ico
+[ debug ] deleting file      :  C:\Users\romain\Apps\Audacity\Icon_3.ico
+[ debug ] deleting file      :  C:\Users\romain\Apps\Audacity\Icon_4.ico
+[ debug ] deleting file      :  C:\Users\romain\Apps\Audacity\Icon_5.ico
+[ debug ] deleting file      :  C:\Users\romain\Apps\Audacity\Icon_6.ico
+[ debug ] deleting file      :  C:\Users\romain\Apps\Audacity\Icon_7.ico
+[ debug ] deleting file      :  C:\Users\romain\Apps\Audacity\Icon_8.ico
+[ debug ] deleting file      :  C:\Users\romain\Apps\Audacity\Icon_9.ico
+
+
+=============================
+= PortableR end
+=============================
