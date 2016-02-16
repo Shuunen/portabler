@@ -12,7 +12,11 @@ namespace PortableR
 		static string extractFolder = "%UserProfile%\\Apps\\";
 		static StreamWriter logInstance;
 		static bool hadError = false;
-		static string portablerExe, portablerFolder;
+		static string portablerExe, portablerFolder, portableAppName;
+		const string portableAppTemp = "portableApp.exe";
+		static string iconsFolder;
+		const string extractedIcon = "Icon_1";
+		const string fallbackIcon = "store";
 		static string appExe, appName, appDir;
 		static string cmd, parameters;
 
@@ -22,7 +26,8 @@ namespace PortableR
 			string[] arguments = Environment.GetCommandLineArgs();
 			portablerExe = Application.ExecutablePath; // C:\Projects\portabler\app\bin\PortableR.exe
 			portablerFolder = Path.GetDirectoryName(Application.ExecutablePath) + "\\";  // C:\Projects\portabler\app\bin\			
-			extractFolder = Environment.ExpandEnvironmentVariables(extractFolder);	
+			iconsFolder = portablerFolder.Replace("app\\bin", "icons");
+			extractFolder = Environment.ExpandEnvironmentVariables(extractFolder);
 			string action = arguments.Length > 1 ? arguments[1] : "";
 			logInstance = new StreamWriter(portablerFolder + logFile);
 			logInstance.AutoFlush = true;
@@ -44,16 +49,18 @@ namespace PortableR
 			Log("Variables", "title");
 			Log("arguments : " + String.Join(", ", arguments));
 			Log("portablerExe : " + portablerExe); // C:\Projects\portabler\app\bin\PortableR.exe
-			Log("portablerFolder : " + portablerFolder); // C:\Projects\portabler\app\bin\
+			Log("portablerFolder : " + portablerFolder); // C:\Projects\portabler\app\bin\			
+			Log("portableAppTemp : " + portableAppTemp);
 			Log("extractFolder : " + extractFolder);
-			Log("appExe : " + appExe);
-			Log("appName : " + appName);
-			Log("appDir : " + appDir);
-
-			if (action.Length > 0) {
-				Log("action : " + action);
+			Log("iconsFolder : " + iconsFolder);
+			if (arguments.Length > 2) {
+				Log("appExe : " + appExe);
+				Log("appName : " + appName);
+				Log("appDir : " + appDir);
 			}
-
+			Log("action : " + action);
+			
+			Log(action, "title");
 			switch (action) {
             		
 				case "install":
@@ -68,34 +75,43 @@ namespace PortableR
 					} finally {
 						key.Close();
 					}
-					CreateSubCommand("Create package", "create");
-					CreateSubCommand("Extract package", "extract");
+					CreateSubCommand("Create package", "create", "windows");
+					CreateSubCommand("Extract package", "extract", "sharethis");
 					break;
 					
-				case "create":								
-					const string portableAppTemp = "portableApp.exe";
-					string dir = Path.GetDirectoryName(appExe);
-					string portableAppName = dir.Substring(dir.LastIndexOf('\\') + 1).Replace(" ", ".");
-					var versionInfo = FileVersionInfo.GetVersionInfo(appExe);
-					string version = string.IsNullOrEmpty(versionInfo.ProductVersion) ? "0" : versionInfo.ProductVersion;
-					version = Regex.Replace(version, @"\D", "");
-					string fileVersion = !string.IsNullOrEmpty(versionInfo.FileVersion) ? "0" : versionInfo.FileVersion;
-					fileVersion = Regex.Replace(fileVersion, @"\D", "");
-					string finalVersion = (int.Parse(version) > int.Parse(fileVersion)) ? version : fileVersion;
-					portableAppName += ("_" + (finalVersion + "000").Substring(0, 3) + ".exe");
-					Log("version : " + version);
-					Log("fileVersion : " + fileVersion);
-					Log("finalVersion : " + finalVersion);
-					Log("portableAppTemp : " + portableAppTemp);
-					Log("portableAppName : " + portableAppName);
-					var configSFX = new StreamWriter(portablerFolder + "ConfigSFX.txt");
-					configSFX.WriteLine("TempMode");
-					configSFX.WriteLine("Silent=2");
-					configSFX.WriteLine("Overwrite=2");
-					configSFX.WriteLine("Title=Portable App by PortableR");
-					configSFX.WriteLine("Setup=" + appName);
-					configSFX.Flush();
-					configSFX.Close();					
+				case "create":							
+					try {
+						string dir = Path.GetDirectoryName(appExe);
+						Log("dir : " + dir);
+						portableAppName = dir.Substring(dir.LastIndexOf('\\') + 1).Replace(" ", ".");					
+						Log("portableAppName : " + portableAppName);			
+						var versionInfo = FileVersionInfo.GetVersionInfo(appExe);
+						string version = string.IsNullOrEmpty(versionInfo.ProductVersion) ? "0" : versionInfo.ProductVersion;
+						version = Regex.Replace(version, @"\D", "");
+						Log("version : " + version);
+						string fileVersion = string.IsNullOrEmpty(versionInfo.FileVersion) ? "0" : versionInfo.FileVersion;
+						fileVersion = Regex.Replace(fileVersion, @"\D", "");
+						Log("fileVersion : " + fileVersion);
+						string finalVersion = (int.Parse(version) > int.Parse(fileVersion)) ? version : fileVersion;
+						finalVersion = (finalVersion + "000").Substring(0, 3);
+						//finalVersion = finalVersion == "000" ? "100" : finalVersion;
+						portableAppName += ("_" + finalVersion + ".exe");					
+						Log("finalVersion : " + finalVersion);
+					} catch (Exception ex) {
+						Log("error while defining variables : " + ex.Message, "error");
+					}					
+					try {
+						var configSFX = new StreamWriter(portablerFolder + "ConfigSFX.txt");
+						configSFX.WriteLine("TempMode");
+						configSFX.WriteLine("Silent=2");
+						configSFX.WriteLine("Overwrite=2");
+						configSFX.WriteLine("Title=Portable App by PortableR");
+						configSFX.WriteLine("Setup=" + appName);
+						configSFX.Flush();
+						configSFX.Close();					
+					} catch (Exception ex) {
+						Log("error while creating sfx config : " + ex.Message, "error");
+					}					
 					try {
 						cmd = portablerFolder + "third-party\\" + "rar.exe";
 						parameters = "a -ep -ep1 -r -sfx\"" + portablerFolder + "Default.sfx\" -z\"" + portablerFolder + "ConfigSFX.txt\" \"" + appDir + portableAppTemp + "\" \"" + appDir + "*\"";
@@ -120,24 +136,19 @@ namespace PortableR
 					}
 					try {
 						Log("Icon Injection", "title");
-						var iconFile = new FileInfo(appDir + "Icon_1.ico");
-						long iconFileSize = 0;
-						if (iconFile.Exists) {
-							iconFileSize = new FileInfo(appDir + "Icon_1.ico").Length;
-							Log("icon file size  : " + iconFileSize);
-						}
-						if (iconFileSize > 1) {
+						string iconFilePath = GetIconForApp();		
+						if (iconFilePath != "") {
 							cmd = portablerFolder + "third-party\\" + "ResourceHacker.exe";
-							parameters = "-addoverwrite" + " " + "\"" + appDir + portableAppTemp + "\"" + "," + portableAppName + ",Icon_1.ico,ICONGROUP,MAINICON,0";
+							parameters = "-addoverwrite" + " " + "\"" + appDir + portableAppTemp + "\"" + "," + portableAppName + "," + "\"" + iconFilePath + "\"" + ",ICONGROUP,MAINICON,0";
 							Log("starting cmd : " + cmd);
 							Log("with params : " + parameters);
 							Process injectProcess = Process.Start(cmd, parameters);
-							injectProcess.WaitForExit();
+							injectProcess.WaitForExit();			
 						} else {
-							Log("no icon injection : icon file not extracted", "error");
+							Log("no icon injection : icon file not found", "error");
 							File.Delete(appDir + portableAppName);
 							File.Move(appDir + portableAppTemp, appDir + portableAppName);
-						}
+						}						
 					} catch (Exception ex) {
 						Log("error while injecting icon : " + ex.Message, "error");
 					}
@@ -190,13 +201,38 @@ namespace PortableR
 			}
 		}
 
-		static void CreateSubCommand(string title, string command)
+		static string GetIconForApp()
 		{
+			var paths = new string[] {
+				appDir + extractedIcon + ".ico",
+				iconsFolder + fallbackIcon + ".ico"
+			};
+			string selectedPath = "";
+			foreach (var path in paths) {
+				Log("icon file path : " + path);
+				var file = new FileInfo(path);
+				Log("icon file exists : " + file.Exists.ToString());
+				if ( file.Exists && file.Length > 1) {
+					Log("icon file selected");
+					selectedPath = path;
+				} 
+			}
+			return selectedPath;
+		}
+		static void CreateSubCommand(string title, string command, string icon = "github")
+		{
+			Log("CreateSubCommand", "title");
+			Log("title : " + title);
+			Log("command : " + command);
+			Log("icon : " + icon);
+			string iconPath = iconsFolder + icon + ".ico";				
+			Log("iconPath : " + iconPath);
+				
 			var key = Microsoft.Win32.Registry.LocalMachine;
-			try {
+			try {						
 				key = key.CreateSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\CommandStore\\shell\\PortableR" + command);
 				key.SetValue("", title);
-				key.SetValue("icon", portablerFolder + command + ".ico");	
+				key.SetValue("icon", iconPath);	
 				key = key.CreateSubKey("command");
 				key.SetValue("", portablerExe + " " + command + " \"%0\"");
 			} catch (Exception ex) {
