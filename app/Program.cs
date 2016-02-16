@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Diagnostics;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 
@@ -83,7 +84,9 @@ namespace PortableR
 					try {
 						string dir = Path.GetDirectoryName(appExe);
 						Log("dir : " + dir);
-						portableAppName = dir.Substring(dir.LastIndexOf('\\') + 1).Replace(" ", ".");					
+						portableAppName = dir.Substring(dir.LastIndexOf('\\') + 1).Replace(" ", ".");	
+						// portableAppName = portableAppName.ToLower(); // lowercase
+						portableAppName = char.ToUpper(portableAppName[0]) + portableAppName.Substring(1);	// uppercase first letter					
 						Log("portableAppName : " + portableAppName);			
 						var versionInfo = FileVersionInfo.GetVersionInfo(appExe);
 						string version = string.IsNullOrEmpty(versionInfo.ProductVersion) ? "0" : versionInfo.ProductVersion;
@@ -94,11 +97,11 @@ namespace PortableR
 						Log("fileVersion : " + fileVersion);
 						string finalVersion = (int.Parse(version) > int.Parse(fileVersion)) ? version : fileVersion;
 						finalVersion = (finalVersion + "000").Substring(0, 3);
-						//finalVersion = finalVersion == "000" ? "100" : finalVersion;
+						// finalVersion = finalVersion == "000" ? "100" : finalVersion;
 						portableAppName += ("_" + finalVersion + ".exe");					
 						Log("finalVersion : " + finalVersion);
 					} catch (Exception ex) {
-						Log("error while defining variables : " + ex.Message, "error");
+						Log("error while defining variables : " + ex, "error");
 					}					
 					try {
 						var configSFX = new StreamWriter(portablerFolder + "ConfigSFX.txt");
@@ -110,7 +113,7 @@ namespace PortableR
 						configSFX.Flush();
 						configSFX.Close();					
 					} catch (Exception ex) {
-						Log("error while creating sfx config : " + ex.Message, "error");
+						Log("error while creating sfx config : " + ex, "error");
 					}					
 					try {
 						cmd = portablerFolder + "third-party\\" + "rar.exe";
@@ -121,22 +124,37 @@ namespace PortableR
 						Process sfxProcess = Process.Start(cmd, parameters);
 						sfxProcess.WaitForExit();
 					} catch (Exception ex) {
-						Log("error while producing sfx : " + ex.Message, "error");
+						Log("error while producing sfx : " + ex, "error");
 					}
-					try {
-						cmd = portablerFolder + "third-party\\" + "ResourceHacker.exe";
-						parameters = "-extract" + " " + "\"" + appExe + "\"" + ", MyProgIcons.rc, icongroup,,";
-						Log("Icon Extract", "title");
-						Log("starting cmd : " + cmd);
-						Log("with params : " + parameters);
-						Process extractProcess = Process.Start(cmd, parameters);
-						extractProcess.WaitForExit();
-					} catch (Exception ex) {
-						Log("error while extracting icon : " + ex.Message, "error");
+					
+					Log("Icon Extract", "title");
+					string iconFilePath = GetIconFromPaths(new string[] {
+						appDir + "icon.ico",
+						appDir + extractedIcon + ".ico"
+					});		
+					if (iconFilePath == "") {
+						try {
+							cmd = portablerFolder + "third-party\\" + "ResourceHacker.exe";
+							parameters = "-extract" + " " + "\"" + appExe + "\"" + ", MyProgIcons.rc, icongroup,,";							
+							Log("starting cmd : " + cmd);
+							Log("with params : " + parameters);
+							Process extractProcess = Process.Start(cmd, parameters);
+							extractProcess.WaitForExit();
+						} catch (Exception ex) {
+							Log("error while extracting icon : " + ex, "error");
+						}
+					} else {
+						Log("No extraction needed : icon already in place");
 					}
+					
 					try {
 						Log("Icon Injection", "title");
-						string iconFilePath = GetIconForApp();		
+						if (iconFilePath == "") {
+							iconFilePath = GetIconFromPaths(new string[] {
+								appDir + extractedIcon + ".ico",
+								iconsFolder + fallbackIcon + ".ico"
+							});
+						}
 						if (iconFilePath != "") {
 							cmd = portablerFolder + "third-party\\" + "ResourceHacker.exe";
 							parameters = "-addoverwrite" + " " + "\"" + appDir + portableAppTemp + "\"" + "," + portableAppName + "," + "\"" + iconFilePath + "\"" + ",ICONGROUP,MAINICON,0";
@@ -150,7 +168,7 @@ namespace PortableR
 							File.Move(appDir + portableAppTemp, appDir + portableAppName);
 						}						
 					} catch (Exception ex) {
-						Log("error while injecting icon : " + ex.Message, "error");
+						Log("error while injecting icon : " + ex, "error");
 					}
 					try {
 						Log("Temp File Cleaning", "title");
@@ -164,7 +182,7 @@ namespace PortableR
 							File.Delete(icon);
 						}
 					} catch (Exception ex) {
-						Log("error while cleaning temp files : " + ex.Message, "error");
+						Log("error while cleaning temp files : " + ex, "error");
 					}
 					break;
 					
@@ -179,7 +197,7 @@ namespace PortableR
 						Process extractProcess = Process.Start(cmd, parameters);
 						extractProcess.WaitForExit();
 					} catch (Exception ex) {
-						Log("error while extracting app : " + ex.Message, "error");
+						Log("error while extracting app : " + ex, "error");
 					}
 					break;
 					
@@ -197,25 +215,25 @@ namespace PortableR
 			Log("PortableR end", "end");
 
 			if (hadError) {
-				System.Windows.Forms.MessageBox.Show("Some error(s) happended, look at " + portablerFolder + logFile);
+				MessageBox.Show("Some error(s) happended, look at " + portablerFolder + logFile);
 			}
 		}
 
-		static string GetIconForApp()
+		static string GetIconFromPaths(string[] paths)
 		{
-			var paths = new string[] {
-				appDir + extractedIcon + ".ico",
-				iconsFolder + fallbackIcon + ".ico"
-			};
 			string selectedPath = "";
 			foreach (var path in paths) {
 				Log("icon file path : " + path);
-				var file = new FileInfo(path);
-				Log("icon file exists : " + file.Exists.ToString());
-				if ( file.Exists && file.Length > 1) {
-					Log("icon file selected");
-					selectedPath = path;
-				} 
+				var file = new FileInfo(path);				
+				if (file.Exists) {
+					Log("icon file exists : " + file.Exists.ToString());
+					if (file.Length != 0) {
+						Log("icon file size : " + file.Length);
+						Log("icon file selected");
+						selectedPath = path;
+						break;
+					}
+				}		
 			}
 			return selectedPath;
 		}
@@ -255,7 +273,8 @@ namespace PortableR
 			switch (type) {
 				case "error":
 					hadError = true;
-					logPrefix = "[ ERROR ] ";
+					logPrefix = "\n\n[ ERROR ] ";
+					logSuffix = "\n\n";
 					break;
 				case "debug":
 					logPrefix = "[ debug ] ";
@@ -272,14 +291,20 @@ namespace PortableR
 					logPrefix = " ";
 					break;
 			}
-
+			
 			int index = str.IndexOf(":", StringComparison.Ordinal);
-			if (index > 0) {
-				logSpaces = new string(' ', logMargin - index);
-				str = str.Substring(0, index) + logSpaces + " : " + str.Substring(index + 1);
+			if (index > 0 && (logMargin - index) > 0) {
+				try {
+					logSpaces = new string(' ', logMargin - index);
+					str = str.Substring(0, index) + logSpaces + " : " + str.Substring(index + 1);
+				} catch (Exception ex) {
+					str = str + "\n\n" + ex + "\n\n";
+				}
 			}
-
-			logInstance.WriteLine(logPrefix + str + logSuffix);
+			
+			str = logPrefix + str + logSuffix;
+			
+			logInstance.WriteLine(str);
 
 			logInstance.Flush();
 
@@ -287,7 +312,10 @@ namespace PortableR
 				logInstance.Close();
 			}
 		}
-
+		
+		static string RemoveSpecialCharacters(string str)
+		{
+			return Regex.Replace(str, "[^a-zA-Z0-9_.]+", "", RegexOptions.Compiled);
+		}
 	}
-
 }
