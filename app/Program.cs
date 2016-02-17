@@ -96,10 +96,10 @@ namespace PortableR
 						Log("portableAppName : " + portableAppName);			
 						var versionInfo = FileVersionInfo.GetVersionInfo(appExe);
 						string version = string.IsNullOrEmpty(versionInfo.ProductVersion) ? "0" : versionInfo.ProductVersion;
-						version = Regex.Replace(version, @"\D", "");
+						version = Regex.Replace(version, @"\D", "").Substring(0, 3);
 						Log("version : " + version);
 						string fileVersion = string.IsNullOrEmpty(versionInfo.FileVersion) ? "0" : versionInfo.FileVersion;
-						fileVersion = Regex.Replace(fileVersion, @"\D", "");
+						fileVersion = Regex.Replace(fileVersion, @"\D", "").Substring(0, 3);
 						Log("fileVersion : " + fileVersion);
 						string finalVersion = (int.Parse(version) > int.Parse(fileVersion)) ? version : fileVersion;
 						finalVersion = (finalVersion + "000").Substring(0, 3);
@@ -175,7 +175,7 @@ namespace PortableR
 						}						
 					} catch (Exception ex) {
 						Log("error while injecting icon : " + ex, "error");
-					}
+					}					
 					try {
 						Log("Temp File Cleaning", "title");
 						Log("deleting file : " + portableAppTemp);
@@ -229,17 +229,15 @@ namespace PortableR
 		{
 			string selectedPath = "";
 			foreach (var path in paths) {
-				Log("icon file path : " + path);
-				var file = new FileInfo(path);				
-				if (file.Exists) {
-					Log("icon file exists : " + file.Exists.ToString());
-					if (file.Length != 0) {
-						Log("icon file size : " + file.Length);
-						Log("icon file selected");
-						selectedPath = path;
-						break;
-					}
-				}		
+				Log("icon file test : " + path);
+				var file = new FileInfo(path);		
+				Log("icon file exists : " + file.Exists.ToString());				
+				if (file.Exists && file.Length != 0) {
+					Log("icon file size : " + file.Length);
+					Log("icon file selected");
+					selectedPath = path;
+					break;
+				}
 			}
 			return selectedPath;
 		}
@@ -259,7 +257,7 @@ namespace PortableR
 				key.SetValue("", title);
 				key.SetValue("icon", iconPath);	
 				key = key.CreateSubKey("command");
-				key.SetValue("", portablerExe + " " + command + " \"%0\"");
+				key.SetValue("", thirdPartyFolder + "Elevate.exe" + " " + portablerExe + " " + command + " \"%0\"");
 			} catch (Exception ex) {
 				Log("error during wrinting \"" + command + "\" command to local machine reg : " + ex, "error");
 			} finally {
