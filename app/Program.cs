@@ -1,7 +1,6 @@
 ﻿using System;
-using System.IO;
 using System.Diagnostics;
-using System.Text;
+using System.IO;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using Microsoft.Win32;
@@ -25,16 +24,16 @@ namespace PortableR
 		static void Main()
 		{
 
-            // init
-            string[] arguments = Environment.GetCommandLineArgs();
+			// init
+			string[] arguments = Environment.GetCommandLineArgs();
 			portablerExe = Application.ExecutablePath; // C:\Projects\portabler\app\bin\PortableR.exe
 			portablerFolder = Path.GetDirectoryName(Application.ExecutablePath) + "\\";  // C:\Projects\portabler\app\bin\	
-            portablerBaseFolder = portablerFolder.Replace("app\\bin\\", ""); // C:\Projects\portabler\
-            iconsFolder = portablerBaseFolder + "icons" + "\\";  // C:\Projects\portabler\icons\	
-            sfxFolder = portablerBaseFolder + "sfx" + "\\";  // C:\Projects\portabler\sfx\	
-            thirdPartyFolder = portablerBaseFolder + "third-party" + "\\";  // C:\Projects\portabler\third-party\	
-            extractFolder = Environment.ExpandEnvironmentVariables(extractFolder); // C:\User\YOU\Apps\	
-            string action = arguments.Length > 1 ? arguments[1] : "";
+			portablerBaseFolder = portablerFolder.Replace("app\\bin\\", ""); // C:\Projects\portabler\
+			iconsFolder = portablerBaseFolder + "icons" + "\\";  // C:\Projects\portabler\icons\	
+			sfxFolder = portablerBaseFolder + "sfx" + "\\";  // C:\Projects\portabler\sfx\	
+			thirdPartyFolder = portablerBaseFolder + "third-party" + "\\";  // C:\Projects\portabler\third-party\	
+			extractFolder = Environment.ExpandEnvironmentVariables(extractFolder); // C:\User\YOU\Apps\	
+			string action = arguments.Length > 1 ? arguments[1] : "";
 			logInstance = new StreamWriter(portablerBaseFolder + logFile);
 			logInstance.AutoFlush = true;
 			if (arguments.Length > 2) {
@@ -43,25 +42,25 @@ namespace PortableR
 				appDir = Path.GetDirectoryName(appExe) + "\\";
 			}
 
-            // splash
-            Log("\n", "draw");
-            Log("   ___           _        _     _        __  ", "draw");
-            Log("  / _ \\___  _ __| |_ __ _| |__ | | ___  /__\\ ", "draw");
-            Log(" / /_)/ _ \\| '__| __/ _` | '_ \\| |/ _ \\/ \\// ", "draw");
-            Log("/ ___/ (_) | |  | || (_| | |_) | |  __/ _  \\ ", "draw");
-            Log("\\/    \\___/|_|   \\__\\__,_|_.__/|_|\\___\\/ \\_/ ", "draw");
+			// splash
+			Log("\n", "draw");
+			Log("   ___           _        _     _        __  ", "draw");
+			Log("  / _ \\___  _ __| |_ __ _| |__ | | ___  /__\\ ", "draw");
+			Log(" / /_)/ _ \\| '__| __/ _` | '_ \\| |/ _ \\/ \\// ", "draw");
+			Log("/ ___/ (_) | |  | || (_| | |_) | |  __/ _  \\ ", "draw");
+			Log("\\/    \\___/|_|   \\__\\__,_|_.__/|_|\\___\\/ \\_/ ", "draw");
 
-            // log parameters
-            Log("Variables aa", "title");
+			// log parameters
+			Log("Variables aa", "title");
 			Log("arguments : " + String.Join(", ", arguments));
 			Log("portablerExe : " + portablerExe); // C:\Projects\portabler\app\bin\PortableR.exe
 			Log("portablerFolder : " + portablerFolder); // C:\Projects\portabler\app\bin\			
 			Log("portableAppTemp : " + portableAppTemp); // portableApp.exe
-            Log("iconsFolder : " + iconsFolder); // C:\Projects\portabler\icons\
-            Log("sfxFolder : " + sfxFolder); // C:\Projects\portabler\sfx\
-            Log("thirdPartyFolder : " + thirdPartyFolder); // C:\Projects\portabler\third-party\
-            Log("extractFolder : " + extractFolder); // C:\User\YOU\Apps\	
-            if (arguments.Length > 2) {
+			Log("iconsFolder : " + iconsFolder); // C:\Projects\portabler\icons\
+			Log("sfxFolder : " + sfxFolder); // C:\Projects\portabler\sfx\
+			Log("thirdPartyFolder : " + thirdPartyFolder); // C:\Projects\portabler\third-party\
+			Log("extractFolder : " + extractFolder); // C:\User\YOU\Apps\	
+			if (arguments.Length > 2) {
 				Log("appExe : " + appExe);
 				Log("appName : " + appName);
 				Log("appDir : " + appDir);

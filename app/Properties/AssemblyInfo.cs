@@ -1,27 +1,25 @@
-﻿using System.Reflection;
+using System;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 // Les informations générales relatives à un assembly dépendent de 
 // l'ensemble d'attributs suivant. Changez les valeurs de ces attributs pour modifier les informations
 // associées à un assembly.
-[assembly: AssemblyTitle("PortableR")]
-[assembly: AssemblyDescription("Make portable app in one click")]
-[assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("PortableR")]
-[assembly: AssemblyCopyright("Romain Racamier Lafon")]
-[assembly: AssemblyTrademark("")]
-[assembly: AssemblyCulture("")]
-
+[assembly: AssemblyTitle ("PortableR")]
+[assembly: AssemblyDescription ("Make portable app in one click")]
+[assembly: AssemblyConfiguration ("")]
+[assembly: AssemblyCompany ("")]
+[assembly: AssemblyProduct ("PortableR")]
+[assembly: AssemblyCopyright ("Romain Racamier Lafon")]
+[assembly: AssemblyTrademark ("")]
+[assembly: AssemblyCulture ("")]
 // L'affectation de la valeur false à ComVisible rend les types invisibles dans cet assembly 
 // aux composants COM. Si vous devez accéder à un type dans cet assembly à partir de 
 // COM, affectez la valeur true à l'attribut ComVisible sur ce type.
-[assembly: ComVisible(false)]
-
+[assembly: ComVisible (false)]
 // Le GUID suivant est pour l'ID de la typelib si ce projet est exposé à COM
-[assembly: Guid("1c2d8d56-980a-45c7-b4e7-a2b09ec80a7b")]
-
+[assembly: Guid ("7b51bcd2-a650-499a-91d2-63b3b6cdf871")]
 // Les informations de version pour un assembly se composent des quatre valeurs suivantes :
 //
 //      Version principale
@@ -32,5 +30,5 @@ using System.Runtime.InteropServices;
 // Vous pouvez spécifier toutes les valeurs ou indiquer les numéros de build et de révision par défaut 
 // en utilisant '*', comme indiqué ci-dessous :
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("2.0.0.0")]
-[assembly: AssemblyFileVersion("2.0.0.0")]
+[assembly: AssemblyVersion ("2.0.0.0")]
+[assembly: AssemblyFileVersion ("2.0.0.0")]
