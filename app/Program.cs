@@ -51,7 +51,7 @@ namespace PortableR
 			Log("\\/    \\___/|_|   \\__\\__,_|_.__/|_|\\___\\/ \\_/ ", "draw");
 
 			// log parameters
-			Log("Variables aa", "title");
+			Log("Variables", "title");
 			Log("arguments : " + String.Join(", ", arguments));
 			Log("portablerExe : " + portablerExe); // C:\Projects\portabler\app\bin\PortableR.exe
 			Log("portablerFolder : " + portablerFolder); // C:\Projects\portabler\app\bin\			
@@ -87,7 +87,14 @@ namespace PortableR
 					break;
 					
 				case "create":							
-					try {
+					try {						
+						string appDirName = Path.GetFileName(Path.GetDirectoryName(appDir));
+						Log("appDirName : " + appDirName);
+						if (Regex.IsMatch(appDirName, "^([0-9])")) {
+							Log("appDir invalid : appDir start with a number, this generate errors with RessourceHacker icon injection, please rename it", "error");
+							return;
+						}
+						
 						string dir = Path.GetDirectoryName(appExe);
 						Log("dir : " + dir);
 						portableAppName = dir.Substring(dir.LastIndexOf('\\') + 1).Replace(" ", ".");	
@@ -167,7 +174,16 @@ namespace PortableR
 							Log("starting cmd : " + cmd);
 							Log("with params : " + parameters);
 							Process injectProcess = Process.Start(cmd, parameters);
-							injectProcess.WaitForExit();			
+							injectProcess.WaitForExit();
+							var file = new FileInfo(appDir + portableAppName);	
+							if (!file.Exists) {
+								Log("output app file not found : icon injection failed with target app extracted icon, trying with default icon");
+								parameters = parameters.Replace(iconFilePath, iconsFolder + fallbackIcon + ".ico");
+								Log("starting cmd : " + cmd);
+								Log("with params : " + parameters);
+								Process fallbackInjectProcess = Process.Start(cmd, parameters);
+								fallbackInjectProcess.WaitForExit();
+							}
 						} else {
 							Log("no icon injection : icon file not found", "error");
 							File.Delete(appDir + portableAppName);
@@ -177,15 +193,17 @@ namespace PortableR
 						Log("error while injecting icon : " + ex, "error");
 					}					
 					try {
-						Log("Temp File Cleaning", "title");
-						Log("deleting file : " + portableAppTemp);
-						File.Delete(appDir + portableAppTemp);
-						Log("deleting file : " + "MyProgIcons.rc");
-						File.Delete(appDir + "MyProgIcons.rc");
-						string[] icons = Directory.GetFiles(appDir, "*.ico");
-						foreach (string icon in icons) {
-							Log("deleting file : " + icon);
-							File.Delete(icon);
+						var file = new FileInfo(appDir + portableAppName);				
+						if (!file.Exists) {
+							Log("portable app has not been generated, cleaning step aborted", "error");
+						} else {
+							Log("Temp File Cleaning", "title");												
+							DeleteIfExists(appDir + portableAppTemp);
+							DeleteIfExists(appDir + "MyProgIcons.rc");				
+							string[] icons = Directory.GetFiles(appDir, "*.ico");
+							foreach (string icon in icons) {
+								DeleteIfExists(icon);
+							}
 						}
 					} catch (Exception ex) {
 						Log("error while cleaning temp files : " + ex, "error");
@@ -241,6 +259,7 @@ namespace PortableR
 			}
 			return selectedPath;
 		}
+		
 		static void CreateSubCommand(string title, string command, string icon = "github")
 		{
 			Log("CreateSubCommand", "title");
@@ -262,6 +281,18 @@ namespace PortableR
 				Log("error during wrinting \"" + command + "\" command to local machine reg : " + ex, "error");
 			} finally {
 				key.Close();
+			}
+		}
+		
+		static void DeleteIfExists(string path)
+		{
+			string filename = Path.GetFileName(path);
+			var file = new FileInfo(path);				
+			if (file.Exists) {
+				Log("file exists : deleting file (" + path + ")");
+				File.Delete(path);
+			} else {
+				Log("file do not exists : skip delete (" + path + ")");
 			}
 		}
 		
