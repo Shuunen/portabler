@@ -78,7 +78,7 @@ namespace PortableR
 						key.SetValue("SubCommands", "PortableRcreate;PortableRextract");
 						key.SetValue("icon", portablerExe);	
 					} catch (Exception ex) {
-						Log("error during wrinting to root reg : " + ex, "error");
+						Log("error during writing to root reg : " + ex, "error");
 					} finally {
 						key.Close();
 					}
@@ -239,7 +239,7 @@ namespace PortableR
 			Log("PortableR end", "end");
 
 			if (hadError) {
-				MessageBox.Show("Some error(s) happended, look at " + portablerFolder + logFile);
+				MessageBox.Show("Some error(s) happened, look at " + portablerFolder + logFile);
 			}
 		}
 
@@ -278,7 +278,7 @@ namespace PortableR
 				key = key.CreateSubKey("command");
 				key.SetValue("", thirdPartyFolder + "Elevate.exe" + " " + portablerExe + " " + command + " \"%0\"");
 			} catch (Exception ex) {
-				Log("error during wrinting \"" + command + "\" command to local machine reg : " + ex, "error");
+				Log("error during writing \"" + command + "\" command to local machine reg : " + ex, "error");
 			} finally {
 				key.Close();
 			}
