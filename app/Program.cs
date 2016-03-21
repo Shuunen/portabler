@@ -102,13 +102,15 @@ namespace PortableR
 						portableAppName = char.ToUpper(portableAppName[0]) + portableAppName.Substring(1);	// uppercase first letter					
 						Log("portableAppName : " + portableAppName);			
 						var versionInfo = FileVersionInfo.GetVersionInfo(appExe);
-						string version = string.IsNullOrEmpty(versionInfo.ProductVersion) ? "0" : versionInfo.ProductVersion;
+						Log("versionInfo : " + versionInfo);
+						var version = string.IsNullOrEmpty(versionInfo.ProductVersion) ? "000" : versionInfo.ProductVersion;
+						Log("version 1 : " + version);
 						version = Regex.Replace(version, @"\D", "").Substring(0, 3);
-						Log("version : " + version);
-						string fileVersion = string.IsNullOrEmpty(versionInfo.FileVersion) ? "0" : versionInfo.FileVersion;
+						Log("version 2 : " + version);
+						var fileVersion = string.IsNullOrEmpty(versionInfo.FileVersion) ? "000" : versionInfo.FileVersion;
 						fileVersion = Regex.Replace(fileVersion, @"\D", "").Substring(0, 3);
 						Log("fileVersion : " + fileVersion);
-						string finalVersion = (int.Parse(version) > int.Parse(fileVersion)) ? version : fileVersion;
+						var finalVersion = (int.Parse(version) > int.Parse(fileVersion)) ? version : fileVersion;
 						finalVersion = (finalVersion + "000").Substring(0, 3);
 						// finalVersion = finalVersion == "000" ? "100" : finalVersion;
 						portableAppName += ("_" + finalVersion + ".exe");					
