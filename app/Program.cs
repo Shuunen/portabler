@@ -95,18 +95,16 @@ namespace PortableR
 							return;
 						}
 						
-						string dir = Path.GetDirectoryName(appExe);
+						var dir = Path.GetDirectoryName(appExe);
 						Log("dir : " + dir);
 						portableAppName = dir.Substring(dir.LastIndexOf('\\') + 1).Replace(" ", ".");	
 						// portableAppName = portableAppName.ToLower(); // lowercase
 						portableAppName = char.ToUpper(portableAppName[0]) + portableAppName.Substring(1);	// uppercase first letter					
 						Log("portableAppName : " + portableAppName);			
 						var versionInfo = FileVersionInfo.GetVersionInfo(appExe);
-						Log("versionInfo : " + versionInfo);
 						var version = string.IsNullOrEmpty(versionInfo.ProductVersion) ? "000" : versionInfo.ProductVersion;
-						Log("version 1 : " + version);
 						version = Regex.Replace(version, @"\D", "").Substring(0, 3);
-						Log("version 2 : " + version);
+						Log("version : " + version);
 						var fileVersion = string.IsNullOrEmpty(versionInfo.FileVersion) ? "000" : versionInfo.FileVersion;
 						fileVersion = Regex.Replace(fileVersion, @"\D", "").Substring(0, 3);
 						Log("fileVersion : " + fileVersion);
