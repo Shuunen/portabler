@@ -103,7 +103,8 @@ namespace PortableR
 						Log("portableAppName : " + portableAppName);			
 						var versionInfo = FileVersionInfo.GetVersionInfo(appExe);
 						var version = string.IsNullOrEmpty(versionInfo.ProductVersion) ? "000" : versionInfo.ProductVersion;
-						version = Regex.Replace(version, @"\D", "").Substring(0, 3);
+						version = Regex.Replace(version, @"\D", "") + "000";
+						version = version.Substring(0, 3);
 						Log("version : " + version);
 						var fileVersion = string.IsNullOrEmpty(versionInfo.FileVersion) ? "000" : versionInfo.FileVersion;
 						fileVersion = Regex.Replace(fileVersion, @"\D", "").Substring(0, 3);
