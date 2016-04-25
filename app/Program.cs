@@ -112,7 +112,8 @@ namespace PortableR
 						version = version.Substring(0, 3);
 						Log("version : " + version);
 						var fileVersion = string.IsNullOrEmpty(versionInfo.FileVersion) ? "000" : versionInfo.FileVersion;
-						fileVersion = Regex.Replace(fileVersion, @"\D", "").Substring(0, 3);
+						fileVersion = Regex.Replace(fileVersion, @"\D", "") + "000";
+						fileVersion = fileVersion.Substring(0, 3);
 						Log("fileVersion : " + fileVersion);
 						var finalVersion = (int.Parse(version) > int.Parse(fileVersion)) ? version : fileVersion;
 						finalVersion = (finalVersion + "000").Substring(0, 3);
