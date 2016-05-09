@@ -69,7 +69,7 @@ namespace PortableR
 					try {
 						key = key.CreateSubKey("exefile\\shell\\PortableR");
 						key.SetValue("MUIVerb", "PortableR");
-						key.SetValue("SubCommands", "PortableRcreate;PortableRextract");
+						key.SetValue("SubCommands", "PortableRcreate;PortableRextract;PortableRautostart");
 						key.SetValue("icon", portablerExe);
 					} catch (Exception ex) {
 						Log("error during writing to root reg : " + ex, "error");
@@ -78,6 +78,8 @@ namespace PortableR
 					}
 					CreateSubCommand("Create package", "create", "windows");
 					CreateSubCommand("Extract package", "extract", "sharethis");
+					CreateSubCommand("Add to start menu", "autostart", "stitcher");
+					// remember to add it to SubCommands below ^^
 					break;
 					
 				case "create":
@@ -250,6 +252,31 @@ namespace PortableR
 						}
 					} catch (Exception ex) {
 						Log("error while extracting app : " + ex, "error");
+					}
+					break;
+
+				case "autostart":					
+					try {
+						
+						if (arguments.Length > 2) {
+							appExe = arguments[2];							
+						} else {
+							Log("no targeted app to create app, missing third parameter", "error");
+							break;
+						}
+						appName = Path.GetFileName(appExe);
+						Log("appExe : " + appExe);
+						Log("appName : " + appName);
+						
+						cmd = "cmd";
+						// "%userprofile%\Start Menu\Programs\Startup\flux.exe" "%userprofile%\Apps\Flux\flux.exe"
+						parameters = "/c mklink \"%userprofile%\\Start Menu\\Programs\\Startup\\" + appName + "\"" + " " + "\"" + appExe + "\"";
+						Log("starting cmd : " + cmd);
+						Log("with params : " + parameters);
+						Process createShortcut = Process.Start(cmd, parameters);
+						createShortcut.WaitForExit();
+					} catch (Exception ex) {
+						Log("error while creating autostart shortcut : " + ex, "error");
 					}
 					break;
 					
