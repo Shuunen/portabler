@@ -69,7 +69,7 @@ namespace PortableR
 					try {
 						key = key.CreateSubKey("exefile\\shell\\PortableR");
 						key.SetValue("MUIVerb", "PortableR");
-						key.SetValue("SubCommands", "PortableRcreate;PortableRextract;PortableRautostart");
+						key.SetValue("SubCommands", "PortableRcreate;PortableRextract;PortableRautostart;PortableRaddpath");
 						key.SetValue("icon", portablerExe);
 					} catch (Exception ex) {
 						Log("error during writing to root reg : " + ex, "error");
@@ -78,7 +78,8 @@ namespace PortableR
 					}
 					CreateSubCommand("Create package", "create", "windows");
 					CreateSubCommand("Extract package", "extract", "sharethis");
-					CreateSubCommand("Add to start menu", "autostart", "stitcher");
+					CreateSubCommand("Autostart with Windows", "autostart", "stumbleupon");
+					CreateSubCommand("Add to PATH", "addpath", "myspace");
 					// remember to add it to SubCommands below ^^
 					break;
 					
@@ -256,8 +257,7 @@ namespace PortableR
 					break;
 
 				case "autostart":					
-					try {
-						
+					try {						
 						if (arguments.Length > 2) {
 							appExe = arguments[2];							
 						} else {
@@ -265,11 +265,14 @@ namespace PortableR
 							break;
 						}
 						appName = Path.GetFileName(appExe);
+						appDir = Path.GetDirectoryName(appExe) + "\\";
+						Log("App auto start", "title");
 						Log("appExe : " + appExe);
 						Log("appName : " + appName);
+						Log("appDir : " + appDir);
 						
 						cmd = "cmd";
-						// "%userprofile%\Start Menu\Programs\Startup\flux.exe" "%userprofile%\Apps\Flux\flux.exe"
+						// mklink "%userprofile%\Start Menu\Programs\Startup\flux.exe" "%userprofile%\Apps\Flux\flux.exe"
 						parameters = "/c mklink \"%userprofile%\\Start Menu\\Programs\\Startup\\" + appName + "\"" + " " + "\"" + appExe + "\"";
 						Log("starting cmd : " + cmd);
 						Log("with params : " + parameters);
@@ -277,6 +280,33 @@ namespace PortableR
 						createShortcut.WaitForExit();
 					} catch (Exception ex) {
 						Log("error while creating autostart shortcut : " + ex, "error");
+					}
+					break;
+					
+				case "addpath":
+					try {
+						if (arguments.Length > 2) {
+							appExe = arguments[2];							
+						} else {
+							Log("no targeted app to create app, missing third parameter", "error");
+							break;
+						}
+						appName = Path.GetFileName(appExe);
+						appDir = Path.GetDirectoryName(appExe) + "\\";
+						Log("Add to PATH", "title");
+						Log("appExe : " + appExe);
+						Log("appName : " + appName);
+						Log("appDir : " + appDir);
+						
+						cmd = "cmd";
+						// setx PATH "%PATH%;C:\Program Files (x86)\Git\bin\"
+						parameters = "/c setx PATH \"%PATH%;" + appDir;
+						Log("starting cmd : " + cmd);
+						Log("with params : " + parameters);
+						Process addToPath = Process.Start(cmd, parameters);
+						addToPath.WaitForExit();
+					} catch (Exception ex) {
+						Log("error while adding folder to user PATH : " + ex, "error");
 					}
 					break;
 					
