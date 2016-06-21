@@ -106,7 +106,9 @@ namespace PortableR
 						var dir = Path.GetDirectoryName(appExe);
 						Log("dir : " + dir);
 						portableAppName = dir.Substring(dir.LastIndexOf('\\') + 1);
-						portableAppName = Regex.Replace(portableAppName, @"[^A-Za-z0-9 -]", "."); // replace non words to dots
+						portableAppName = Regex.Replace(portableAppName, @"[^A-Za-z0-9]", "."); // replace non words to dots
+						portableAppName = Regex.Replace(portableAppName, @"[.]+", "."); // replace multiple dots to one dot
+						Log("portableAppName : " + portableAppName);
 						portableAppName = Regex.Replace(portableAppName, @"^\W+", ""); // remove non words at start
 						portableAppName = Regex.Replace(portableAppName, @"\W+$", ""); // remove non words at end
 						portableAppName = char.ToUpper(portableAppName[0]) + portableAppName.Substring(1);	// uppercase first letter
