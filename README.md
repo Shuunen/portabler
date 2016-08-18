@@ -23,6 +23,10 @@ Create portable apps in 1 click !
 
 ![Usage video](https://github.com/Shuunen/portabler/blob/master/Usage.gif)
 
+## TODO
+* handle case when targeted exe contains spaces
+
+
 ## Thanks
 - ResourceHacker : the best resource editing tool (http://angusj.com/resourcehacker/)
 - Elevate : a handy tool to start app with higher privileges (www.winability.com/elevate/)
